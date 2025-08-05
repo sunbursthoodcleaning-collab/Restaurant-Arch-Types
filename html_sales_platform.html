@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Sales Intelligence Platform</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell, LineChart, Line } = Recharts;
+
+        // Icon components (simplified)
+        const Icon = ({ name, className = "h-5 w-5" }) => {
+            const icons = {
+                brain: "🧠",
+                target: "🎯",
+                users: "👥",
+                trending: "📈",
+                award: "🏆",
+                map: "📍",
+                phone: "📞",
+                clock: "🕐",
+                check: "✅",
+                alert: "⚠️",
+                star: "⭐",
+                heart: "❤️",
+                shield: "🛡️",
+                crown: "👑",
+                leaf: "🍃",
+                sparkles: "✨",
+                home: "🏠",
+                building: "🏢",
+                dollar: "💰",
+                eye: "👁️",
+                file: "📄",
+                download: "⬇️",
+                zap: "⚡",
+                globe: "🌍",
+                calculator: "🧮",
+                camera: "📷",
+                send: "📤",
+                user: "👤",
+                mail: "📧"
+            };
+            return <span className={`inline-block ${className}`}>{icons[name] || "●"}</span>;
+        };
+
+        const EnterpriseSalesIntelligencePlatform = () => {
+            const [currentStep, setCurrentStep] = useState('verification');
+            const [restaurantData, setRestaurantData] = useState({
+                name: '',
+                address: '',
+                phone: '',
+                verified: false
+            });
+            const [archetypeAnalysis, setArchetypeAnalysis] = useState(null);
+            const [estimateData, setEstimateData] = useState({});
+            const [competitiveInsights, setCompetitiveInsights] = useState([]);
+
+            // Enterprise-Grade Archetype Detection Engine
+            const ARCHETYPE_ENGINE = {
+                'LOCAL_COMMUNITY': {
+                    name: 'The Local Community Hub',
+                    icon: '🏠',
+                    color: 'from-blue-600 to-blue-700',
+                    textColor: 'text-blue-700',
+                    bgColor: 'bg-blue-50',
+                    borderColor: 'border-blue-200',
+                    psychology: 'Community belonging, neighborhood pride, local identity',
+                    customerProfile: 'Residents seeking familiar, trusted neighborhood dining',
+                    marketingStrategy: 'Community-focused messaging, local partnerships, neighborhood events',
+                    revenueProfile: { avg: 1200, frequency: 'Monthly', retention: 'High' },
+                    patterns: [
+                        /\b\d+\s+(street|st|avenue|ave|boulevard|blvd|road|rd|plaza|way|place|pl)\b/i,
+                        /\b(grove|beach|lakes|gardens|heights|hills|park|downtown|uptown|midtown)\b/i,
+                        /\b(neighborhood|local|corner|community)\b/i
+                    ],
+                    keywords: ['street', 'avenue', 'grove', 'beach', 'local', 'corner', 'neighborhood'],
+                    salesApproach: {
+                        opening: "I'm working with local businesses to strengthen our neighborhood business community.",
+                        value: "We understand the importance of supporting local establishments like yours.",
+                        close: "Let's help you maintain the standards your neighbors expect."
+                    }
+                },
+                'CULTURAL_HERITAGE': {
+                    name: 'The Cultural Heritage Keeper',
+                    icon: '🌍',
+                    color: 'from-purple-600 to-purple-700',
+                    textColor: 'text-purple-700',
+                    bgColor: 'bg-purple-50',
+                    borderColor: 'border-purple-200',
+                    psychology: 'Cultural authenticity, tradition preservation, heritage pride',
+                    customerProfile: 'Diners seeking authentic cultural experiences and traditional flavors',
+                    marketingStrategy: 'Authenticity messaging, cultural celebrations, heritage storytelling',
+                    revenueProfile: { avg: 1400, frequency: 'Bi-Monthly', retention: 'Very High' },
+                    patterns: [
+                        /\b(beijing|shanghai|havana|little\s+italy|chinatown|tokyo|seoul|mumbai|bangkok|madrid|paris|rome)\b/i,
+                        /\b(authentic|traditional|original|heritage|classic|family|casa|el|la|le|il)\b/i,
+                        /\b(china|chinese|italy|italian|mexico|mexican|cuba|cuban|thai|indian|greek|french|spanish)\b/i
+                    ],
+                    keywords: ['beijing', 'havana', 'authentic', 'traditional', 'heritage', 'family', 'casa'],
+                    salesApproach: {
+                        opening: "I respect the cultural standards and authenticity your establishment represents.",
+                        value: "Our service maintains the high standards your heritage demands.",
+                        close: "Let's preserve the authenticity that makes your restaurant special."
+                    }
+                },
+                'PREMIUM_AUTHORITY': {
+                    name: 'The Premium Authority',
+                    icon: '👑',
+                    color: 'from-gray-800 to-gray-900',
+                    textColor: 'text-gray-800',
+                    bgColor: 'bg-gray-50',
+                    borderColor: 'border-gray-300',
+                    psychology: 'Elite status, exclusivity, premium positioning, authority',
+                    customerProfile: 'High-end diners expecting premium experiences and impeccable service',
+                    marketingStrategy: 'Luxury positioning, exclusivity messaging, premium partnerships',
+                    revenueProfile: { avg: 2200, frequency: 'Bi-Monthly', retention: 'Very High' },
+                    patterns: [
+                        /^[A-Z]{2,6}$/,
+                        /\b(chef|master|executive|signature|premier|elite|royal|crown|king|queen|emperor)\b/i,
+                        /\b(platinum|gold|diamond|luxury|exclusive|premium|fine|haute)\b/i
+                    ],
+                    keywords: ['chef', 'master', 'signature', 'premium', 'exclusive', 'elite', 'royal'],
+                    salesApproach: {
+                        opening: "Your establishment clearly maintains premium standards that deserve equally premium service.",
+                        value: "We provide white-glove service that matches your level of excellence.",
+                        close: "Let's ensure your kitchen systems reflect the same quality as your cuisine."
+                    }
+                },
+                'PERSONAL_CONNECTION': {
+                    name: 'The Personal Connection',
+                    icon: '❤️',
+                    color: 'from-green-600 to-green-700',
+                    textColor: 'text-green-700',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    psychology: 'Personal relationships, family atmosphere, trust, warmth',
+                    customerProfile: 'Customers seeking personal service and family-style dining experiences',
+                    marketingStrategy: 'Personal stories, family values, relationship building',
+                    revenueProfile: { avg: 1100, frequency: 'Quarterly', retention: 'Very High' },
+                    patterns: [
+                        /\b(joe's|john's|mike's|tony's|maria's|mama's|papa's|uncle|aunt|grandma's|nana's)\b/i,
+                        /\b(family|home|kitchen|house|place|spot)\b/i,
+                        /'s\s+(cafe|restaurant|kitchen|place|spot|diner|eatery)\b/i
+                    ],
+                    keywords: ["joe's", "mama's", "papa's", "family", "home", "kitchen", "uncle", "aunt"],
+                    salesApproach: {
+                        opening: "I can see this is a family business, and I treat every family business like my own.",
+                        value: "We believe in building long-term relationships with families like yours.",
+                        close: "Let's take care of your kitchen the way you take care of your customers."
+                    }
+                },
+                'PASSIONATE_EXPRESSION': {
+                    name: 'The Passionate Expression',
+                    icon: '🔥',
+                    color: 'from-red-600 to-red-700',
+                    textColor: 'text-red-700',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    psychology: 'Emotional intensity, passion-driven, bold expression, heart-centered',
+                    customerProfile: 'Diners attracted to bold flavors and passionate culinary expression',
+                    marketingStrategy: 'Emotional storytelling, passion messaging, bold promotions',
+                    revenueProfile: { avg: 1300, frequency: 'Monthly', retention: 'High' },
+                    patterns: [
+                        /\b(love|heart|passion|soul|fire|flame|hot|spicy|crazy|wild|intense|mad)\b/i,
+                        /\b(i\s+heart|♥|❤)\b/i,
+                        /\s+(\&|and|n)\s+/i
+                    ],
+                    keywords: ['love', 'heart', 'passion', 'soul', 'fire', 'hot', 'spicy', 'crazy'],
+                    salesApproach: {
+                        opening: "I can see the passion you put into this place - that same passion drives our work.",
+                        value: "We match your intensity for excellence with our commitment to quality.",
+                        close: "Let's bring that same passion to keeping your kitchen systems perfect."
+                    }
+                },
+                'INNOVATIVE_REBEL': {
+                    name: 'The Innovative Rebel',
+                    icon: '⚡',
+                    color: 'from-orange-600 to-orange-700',
+                    textColor: 'text-orange-700',
+                    bgColor: 'bg-orange-50',
+                    borderColor: 'border-orange-200',
+                    psychology: 'Anti-establishment, innovation, humor, unconventional approach',
+                    customerProfile: 'Adventurous diners seeking unique experiences and innovative concepts',
+                    marketingStrategy: 'Disruptive messaging, humor, unconventional promotions',
+                    revenueProfile: { avg: 1250, frequency: 'Monthly', retention: 'Medium' },
+                    patterns: [
+                        /\b(bad|dirty|wicked|rebel|rogue|outlaw|maverick|chaos|trouble|wild|raw|naked)\b/i,
+                        /\b(hate|damn|wtf|omg|crazy|insane|mad)\b/i,
+                        /\b(untamed|unleashed|forbidden|twisted|broken)\b/i
+                    ],
+                    keywords: ['bad', 'dirty', 'rebel', 'wild', 'raw', 'naked', 'crazy', 'mad'],
+                    salesApproach: {
+                        opening: "I like what you're doing here - breaking the mold, doing things differently.",
+                        value: "We're not your typical corporate service company - we get the job done without the BS.",
+                        close: "Let's keep your operation running smooth so you can keep being rebels in the kitchen."
+                    }
+                },
+                'NATURAL_AUTHENTIC': {
+                    name: 'The Natural Authentic',
+                    icon: '🍃',
+                    color: 'from-emerald-600 to-emerald-700',
+                    textColor: 'text-emerald-700',
+                    bgColor: 'bg-emerald-50',
+                    borderColor: 'border-emerald-200',
+                    psychology: 'Natural living, health consciousness, authenticity, purity',
+                    customerProfile: 'Health-conscious diners seeking organic, natural, sustainable options',
+                    marketingStrategy: 'Health benefits, sustainability, natural ingredients, eco-friendly',
+                    revenueProfile: { avg: 1350, frequency: 'Bi-Monthly', retention: 'High' },
+                    patterns: [
+                        /\b(fresh|natural|organic|pure|green|healthy|clean|farm|garden|harvest)\b/i,
+                        /\b(bee|bear|fox|deer|eagle|lion|tiger|wolf|honey|golden|crystal)\b/i,
+                        /\b(earth|nature|wild|free|raw|whole|real)\b/i
+                    ],
+                    keywords: ['fresh', 'natural', 'organic', 'pure', 'green', 'healthy', 'farm', 'bee'],
+                    salesApproach: {
+                        opening: "I can see you're committed to natural, healthy food preparation.",
+                        value: "Our eco-friendly cleaning methods align perfectly with your natural approach.",
+                        close: "Let's maintain your kitchen with the same natural standards you use for food."
+                    }
+                },
+                'EXPERIENTIAL_MYSTIC': {
+                    name: 'The Experiential Mystic',
+                    icon: '✨',
+                    color: 'from-indigo-600 to-indigo-700',
+                    textColor: 'text-indigo-700',
+                    bgColor: 'bg-indigo-50',
+                    borderColor: 'border-indigo-200',
+                    psychology: 'Transformation, wonder, magical experiences, escape from ordinary',
+                    customerProfile: 'Experience-seekers wanting memorable, magical dining adventures',
+                    marketingStrategy: 'Experiential marketing, transformation messaging, wonder creation',
+                    revenueProfile: { avg: 1500, frequency: 'Bi-Monthly', retention: 'High' },
+                    patterns: [
+                        /\b(magic|mystical|enchanted|wonder|dream|fantasy|legend|myth|fairy|wizard)\b/i,
+                        /\b(neverland|wonderland|paradise|heaven|nirvana|zen|karma)\b/i,
+                        /\b(dragon|phoenix|unicorn|castle|palace|temple)\b/i
+                    ],
+                    keywords: ['magic', 'wonder', 'dream', 'fantasy', 'neverland', 'enchanted', 'mystical'],
+                    salesApproach: {
+                        opening: "You've created something truly special here - a place where dining becomes an experience.",
+                        value: "We don't just clean kitchens - we help maintain the magic that happens behind the scenes.",
+                        close: "Let's ensure your kitchen operations are as flawless as the experiences you create."
+                    }
+                }
+            };
+
+            // Advanced Archetype Detection Algorithm
+            const detectRestaurantArchetype = (name) => {
+                const cleanName = name.toLowerCase().trim();
+                let scores = {};
+                
+                // Initialize scores
+                Object.keys(ARCHETYPE_ENGINE).forEach(key => {
+                    scores[key] = 0;
+                });
+
+                // Pattern matching with weighted scoring
+                Object.entries(ARCHETYPE_ENGINE).forEach(([key, archetype]) => {
+                    // Pattern matching (highest weight)
+                    archetype.patterns.forEach(pattern => {
+                        if (pattern.test(name)) {
+                            scores[key] += 25;
+                        }
+                    });
+
+                    // Keyword matching (medium weight)
+                    archetype.keywords.forEach(keyword => {
+                        if (cleanName.includes(keyword.toLowerCase())) {
+                            scores[key] += 15;
+                        }
+                    });
+
+                    // Special case bonuses
+                    if (key === 'PREMIUM_AUTHORITY' && /^[A-Z]{2,6}$/.test(name.trim())) {
+                        scores[key] += 30; // All caps bonus
+                    }
+                    
+                    if (key === 'CULTURAL_HERITAGE' && /^(beijing|havana|little\s+italy)/i.test(name)) {
+                        scores[key] += 20; // Cultural location bonus
+                    }
+                });
+
+                // Find highest scoring archetype
+                const bestMatch = Object.entries(scores).reduce((a, b) => 
+                    scores[a[0]] > scores[b[0]] ? a : b
+                );
+
+                const confidence = Math.min(95, Math.max(60, bestMatch[1] * 2));
+                
+                return {
+                    archetype: bestMatch[0],
+                    data: ARCHETYPE_ENGINE[bestMatch[0]],
+                    confidence: confidence,
+                    allScores: scores
+                };
+            };
+
+            // Generate Professional Competitive Analysis
+            const generateCompetitiveAnalysis = (archetype, name) => {
+                return {
+                    archetypeStrengths: [
+                        `Strong ${archetype.data.psychology.toLowerCase()} positioning`,
+                        'Clear brand identity communication',
+                        'Targeted customer attraction',
+                        'Memorable market positioning'
+                    ],
+                    marketOpportunities: [
+                        'Strengthen archetype consistency across all touchpoints',
+                        'Leverage psychological triggers in marketing campaigns',
+                        'Optimize service experience alignment with brand promise',
+                        'Differentiate from generic competitor messaging'
+                    ],
+                    competitiveAdvantages: [
+                        'Unique psychological market position',
+                        'Authentic brand expression',
+                        'Clear customer segment targeting',
+                        'Strong emotional connection potential'
+                    ],
+                    revenueOptimization: [
+                        `Average revenue potential: $${archetype.data.revenueProfile.avg}/month`,
+                        `Recommended service frequency: ${archetype.data.revenueProfile.frequency}`,
+                        `Customer retention expectation: ${archetype.data.revenueProfile.retention}`,
+                        'Premium pricing opportunity based on brand positioning'
+                    ]
+                };
+            };
+
+            // Professional Estimate Calculator
+            const calculateEstimate = (data) => {
+                const basePrice = 180;
+                const sizeMultiplier = {
+                    'small': 1.0,
+                    'medium': 1.3,
+                    'large': 1.6,
+                    'xlarge': 2.0
+                };
+                const frequencyMultiplier = {
+                    'monthly': 1.0,
+                    'bimonthly': 0.85,
+                    'quarterly': 0.75
+                };
+                const complexityMultiplier = {
+                    'light': 1.0,
+                    'moderate': 1.2,
+                    'heavy': 1.4
+                };
+
+                const estimate = basePrice * 
+                    (sizeMultiplier[data.kitchenSize] || 1.0) * 
+                    (frequencyMultiplier[data.frequency] || 1.0) * 
+                    (complexityMultiplier[data.complexity] || 1.0) * 
+                    (parseInt(data.hoods) || 1);
+
+                return {
+                    monthly: Math.round(estimate),
+                    annual: Math.round(estimate * 12),
+                    savings: Math.round(estimate * 0.15), // Quarterly discount
+                    premium: Math.round(estimate * 1.25) // Premium service tier
+                };
+            };
+
+            // Handle restaurant verification
+            const handleVerification = (data) => {
+                setRestaurantData({ ...data, verified: true });
+                const analysis = detectRestaurantArchetype(data.name);
+                setArchetypeAnalysis(analysis);
+                setCompetitiveInsights(generateCompetitiveAnalysis(analysis, data.name));
+                setCurrentStep('analysis');
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+                    {/* Professional Header */}
+                    <div className="bg-white border-b border-slate-200 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <div className="p-2 bg-blue-600 rounded-lg">
+                                        <Icon name="brain" className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-bold text-slate-900">Sales Intelligence Platform</h1>
+                                        <p className="text-sm text-slate-600">Enterprise Restaurant Analysis & Service Solutions</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <div className="text-right text-sm">
+                                        <div className="font-medium text-slate-900">Miami-Dade County</div>
+                                        <div className="text-slate-500">Field Operations</div>
+                                    </div>
+                                    <div className="h-8 w-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                                        <Icon name="check" className="h-5 w-5 text-emerald-600" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-6 py-8">
+                        {/* Step 1: Restaurant Verification */}
+                        {currentStep === 'verification' && (
+                            <div className="max-w-2xl mx-auto">
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                                    <div className="text-center mb-8">
+                                        <div className="p-3 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                            <Icon name="building" className="h-8 w-8 text-blue-600" />
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-slate-900 mb-2">Restaurant Data Verification</h2>
+                                        <p className="text-slate-600">Please verify the current information for analysis</p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-2">Restaurant Name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g., Havana Harry's, NAOE, Joe's Kitchen"
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                onChange={(e) => setRestaurantData({...restaurantData, name: e.target.value})}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-2">Address</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Complete street address"
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                onChange={(e) => setRestaurantData({...restaurantData, address: e.target.value})}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="(305) 123-4567"
+                                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                onChange={(e) => setRestaurantData({...restaurantData, phone: e.target.value})}
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleVerification(restaurantData)}
+                                            disabled={!restaurantData.name}
+                                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Verify & Analyze Restaurant
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 2: Archetype Analysis Presentation */}
+                        {currentStep === 'analysis' && archetypeAnalysis && (
+                            <div className="space-y-8">
+                                {/* Archetype Result Card */}
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className={`bg-gradient-to-r ${archetypeAnalysis.data.color} p-6 text-white`}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="p-3 bg-white/20 rounded-lg text-2xl">
+                                                    {archetypeAnalysis.data.icon}
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-2xl font-bold">{archetypeAnalysis.data.name}</h2>
+                                                    <p className="text-white/90">{restaurantData.name}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm text-white/80">Analysis Confidence</div>
+                                                <div className="text-3xl font-bold">{archetypeAnalysis.confidence}%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <h3 className="font-semibold text-slate-900 mb-3">Psychological Profile</h3>
+                                                <p className="text-slate-600 mb-4">{archetypeAnalysis.data.psychology}</p>
+                                                
+                                                <h4 className="font-medium text-slate-900 mb-2">Customer Profile</h4>
+                                                <p className="text-sm text-slate-600">{archetypeAnalysis.data.customerProfile}</p>
+                                            </div>
+
+                                            <div>
+                                                <h3 className="font-semibold text-slate-900 mb-3">Revenue Profile</h3>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Avg Monthly Revenue:</span>
+                                                        <span className="font-medium">${archetypeAnalysis.data.revenueProfile.avg}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Service Frequency:</span>
+                                                        <span className="font-medium">{archetypeAnalysis.data.revenueProfile.frequency}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Retention Rate:</span>
+                                                        <span className="font-medium">{archetypeAnalysis.data.revenueProfile.retention}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+                                            <h4 className="font-medium text-slate-900 mb-2">Recommended Sales Approach</h4>
+                                            <p className="text-sm text-slate-600 italic">"{archetypeAnalysis.data.salesApproach.opening}"</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Competitive Analysis */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                        <h3 className="text-lg font-semibold text-slate-900 mb-4">Strategic Strengths</h3>
+                                        <div className="space-y-3">
+                                            {competitiveInsights.archetypeStrengths?.map((strength, index) => (
+                                                <div key={index} className="flex items-start space-x-3">
+                                                    <Icon name="check" className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                                                    <span className="text-sm text-slate-600">{strength}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                        <h3 className="text-lg font-semibold text-slate-900 mb-4">Growth Opportunities</h3>
+                                        <div className="space-y-3">
+                                            {competitiveInsights.marketOpportunities?.map((opportunity, index) => (
+                                                <div key={index} className="flex items-start space-x-3">
+                                                    <Icon name="trending" className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                                    <span className="text-sm text-slate-600">{opportunity}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action Panel */}
+                                <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl shadow-lg p-8 text-white">
+                                    <div className="text-center mb-6">
+                                        <h3 className="text-xl font-bold mb-2">Professional Kitchen Exhaust Services</h3>
+                                        <p className="text-slate-300">Now that we've analyzed your brand positioning, let's ensure your kitchen systems match your standards.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <button
+                                            onClick={() => setCurrentStep('estimate')}
+                                            className="bg-white text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-100 flex items-center justify-center space-x-2"
+                                        >
+                                            <Icon name="calculator" className="h-5 w-5" />
+                                            <span>Get Service Estimate</span>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => setCurrentStep('insights')}
+                                            className="bg-slate-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-600 flex items-center justify-center space-x-2"
+                                        >
+                                            <Icon name="file" className="h-5 w-5" />
+                                            <span>Premium Insights Report</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Professional Service Estimate */}
+                        {currentStep === 'estimate' && (
+                            <div className="max-w-4xl mx-auto">
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                                    <div className="text-center mb-8">
+                                        <h2 className="text-2xl font-bold text-slate-900 mb-2">Kitchen Exhaust Service Assessment</h2>
+                                        <p className="text-slate-600">Professional evaluation for {restaurantData.name}</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Kitchen Size</label>
+                                                <select 
+                                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    onChange={(e) => setEstimateData({...estimateData, kitchenSize: e.target.value})}
+                                                >
+                                                    <option value="">Select size</option>
+                                                    <option value="small">Small (under 500 sq ft)</option>
+                                                    <option value="medium">Medium (500-1000 sq ft)</option>
+                                                    <option value="large">Large (1000-2000 sq ft)</option>
+                                                    <option value="xlarge">Extra Large (2000+ sq ft)</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Number of Exhaust Hoods</label>
+                                                <select 
+                                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    onChange={(e) => setEstimateData({...estimateData, hoods: e.target.value})}
+                                                >
+                                                    <option value="">Select quantity</option>
+                                                    <option value="1">1 Hood</option>
+                                                    <option value="2">2 Hoods</option>
+                                                    <option value="3">3 Hoods</option>
+                                                    <option value="4">4+ Hoods</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Cooking Intensity</label>
+                                                <select 
+                                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    onChange={(e) => setEstimateData({...estimateData, complexity: e.target.value})}
+                                                >
+                                                    <option value="">Select intensity</option>
+                                                    <option value="light">Light Cooking (minimal grease)</option>
+                                                    <option value="moderate">Moderate Cooking (standard grease)</option>
+                                                    <option value="heavy">Heavy Cooking (high grease/frying)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Preferred Service Frequency</label>
+                                                <select 
+                                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    onChange={(e) => setEstimateData({...estimateData, frequency: e.target.value})}
+                                                >
+                                                    <option value="">Select frequency</option>
+                                                    <option value="monthly">Monthly (recommended)</option>
+                                                    <option value="bimonthly">Bi-Monthly (every 2 months)</option>
+                                                    <option value="quarterly">Quarterly (every 3 months)</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Last Professional Cleaning</label>
+                                                <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                                    <option value="">Select timeframe</option>
+                                                    <option value="recent">Within last 3 months</option>
+                                                    <option value="moderate">3-6 months ago</option>
+                                                    <option value="overdue">6+ months ago</option>
+                                                    <option value="never">Never professionally cleaned</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-2">Special Requirements</label>
+                                                <textarea 
+                                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    rows="3"
+                                                    placeholder="Any specific concerns or requirements..."
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Generate Estimate */}
+                                    {estimateData.kitchenSize && estimateData.hoods && estimateData.complexity && (
+                                        <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                                            <h3 className="font-semibold text-blue-900 mb-4">Professional Service Estimate</h3>
+                                            {(() => {
+                                                const estimate = calculateEstimate(estimateData);
+                                                return (
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-blue-900">${estimate.monthly}</div>
+                                                            <div className="text-sm text-blue-700">Per Service</div>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-blue-900">${estimate.annual}</div>
+                                                            <div className="text-sm text-blue-700">Annual Contract</div>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-emerald-600">${estimate.savings}</div>
+                                                            <div className="text-sm text-emerald-700">Annual Savings</div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+
+                                    <div className="mt-8 flex justify-center space-x-4">
+                                        <button
+                                            onClick={() => setCurrentStep('analysis')}
+                                            className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+                                        >
+                                            Back to Analysis
+                                        </button>
+                                        <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700">
+                                            Schedule Service Assessment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 4: Premium Insights Upsell */}
+                        {currentStep === 'insights' && (
+                            <div className="max-w-5xl mx-auto">
+                                <div className="text-center mb-8">
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-4">Premium Business Intelligence</h2>
+                                    <p className="text-lg text-slate-600">Comprehensive competitive analysis and strategic recommendations</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                        <div className="text-center mb-6">
+                                            <div className="p-3 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                                <Icon name="target" className="h-8 w-8 text-blue-600" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold text-slate-900 mb-2">Market Position Analysis</h3>
+                                            <p className="text-slate-600 text-sm">Comprehensive competitive landscape and positioning insights</p>
+                                        </div>
+                                        
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Competitive landscape mapping
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Local market positioning analysis
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Customer psychology insights
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Strategic recommendations
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-slate-900 mb-1">$297</div>
+                                            <div className="text-slate-600 text-sm mb-4">One-time analysis</div>
+                                            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700">
+                                                Get Analysis
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-lg border-2 border-blue-500 p-6 relative">
+                                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">MOST POPULAR</span>
+                                        </div>
+                                        
+                                        <div className="text-center mb-6">
+                                            <div className="p-3 bg-emerald-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                                <Icon name="trending" className="h-8 w-8 text-emerald-600" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold text-slate-900 mb-2">Growth Strategy Package</h3>
+                                            <p className="text-slate-600 text-sm">Complete business intelligence with ongoing support</p>
+                                        </div>
+                                        
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Everything in Market Position
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Revenue optimization strategies
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Marketing message optimization
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Quarterly market updates
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Phone consultation included
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-slate-900 mb-1">$697</div>
+                                            <div className="text-slate-600 text-sm mb-4">Quarterly subscription</div>
+                                            <button className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700">
+                                                Start Package
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                        <div className="text-center mb-6">
+                                            <div className="p-3 bg-purple-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                                <Icon name="crown" className="h-8 w-8 text-purple-600" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold text-slate-900 mb-2">Executive Consultation</h3>
+                                            <p className="text-slate-600 text-sm">Personal strategy session with implementation roadmap</p>
+                                        </div>
+                                        
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                2-hour strategic session
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Personalized growth plan
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                Implementation roadmap
+                                            </div>
+                                            <div className="flex items-center text-sm text-slate-600">
+                                                <Icon name="check" className="h-4 w-4 text-emerald-600 mr-2" />
+                                                30-day follow-up support
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-slate-900 mb-1">$1,297</div>
+                                            <div className="text-slate-600 text-sm mb-4">One-time session</div>
+                                            <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700">
+                                                Book Session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 text-center">
+                                    <button
+                                        onClick={() => setCurrentStep('analysis')}
+                                        className="px-6 py-2 text-slate-600 hover:text-slate-900"
+                                    >
+                                        ← Back to Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<EnterpriseSalesIntelligencePlatform />, document.getElementById('root'));
+    </script>
+</body>
+</html>
